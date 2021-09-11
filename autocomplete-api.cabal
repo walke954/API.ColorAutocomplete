@@ -1,0 +1,42 @@
+cabal-version:      2.4
+name:               autocomplete-api
+version:            0.1.0.0
+
+-- A short (one-line) description of the package.
+-- synopsis:
+
+-- A longer description of the package.
+-- description:
+
+-- A URL where users can report bugs.
+-- bug-reports:
+
+-- The license under which the package is released.
+-- license:
+author:             Jonathan Walker
+maintainer:         walkjo53@gmail.com
+
+-- A copyright notice.
+-- copyright:
+-- category:
+extra-source-files: CHANGELOG.md
+
+common common-all
+    build-depends:    base ^>=4.12.0.0, containers
+    default-language: Haskell2010
+
+library
+    import:           common-all
+    expose-modules:   Autocomplete
+    hs-source-dirs:   libs
+
+executable autocomplete-api
+    import:           common-all
+    main-is:          Main.hs
+
+    -- Modules included in this executable, other than Main.
+    other-modules: Autocomplete
+
+    -- LANGUAGE extensions used by modules in this package.
+    -- other-extensions:
+    hs-source-dirs:   app, libs
