@@ -5,6 +5,9 @@ import qualified Autocomplete as Auto
 testList :: [String]
 testList = ["hello", "goodbye", "godspeed", "good-looking", "gassy", "greeeeat!"]
 
+opts :: Auto.SearchOptions
+opts = Auto.defaultSearchOptions
+
 main :: IO ()
 main = do
     let t = Auto.fromList testList
@@ -13,6 +16,6 @@ main = do
 mainLoop :: Auto.Trie -> IO ()
 mainLoop t = do
     str <- getLine
-    let ls = Auto.search 10 t str
+    let ls = Auto.search t Auto.defaultSearchOptions str
     putStrLn $ unwords ls
     mainLoop t
