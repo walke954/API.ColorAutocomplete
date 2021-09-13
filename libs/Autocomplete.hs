@@ -60,7 +60,7 @@ update t s
         c = head s
         cm = children t
         d = new c $ length s == 1
-        nt = maybe d (\v -> v) $ Map.lookup c cm
+        nt = maybe d id $ Map.lookup c cm
         nm = Map.insert c (update nt (tail s)) cm
 
 data SearchOptions = SearchOptions
@@ -93,7 +93,6 @@ contains t s
 search :: Trie -> SearchOptions -> String -> [Result]
 search t opts s
     | length ts < 1 = []
-    -- | otherwise = searchTrieStack [] n [] $ [head ts]
     | otherwise = searchThroughPath [] n ts
     where
         n = count opts

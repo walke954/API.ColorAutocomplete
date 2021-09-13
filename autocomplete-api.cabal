@@ -22,20 +22,37 @@ maintainer:         walkjo53@gmail.com
 extra-source-files: CHANGELOG.md
 
 common common-all
-    build-depends:    base ^>=4.12.0.0, containers
+    build-depends:    base ^>=4.12.0.0, containers, time, bytestring
     default-language: Haskell2010
 
-library
+library autocomplete
     import:           common-all
-    expose-modules:   Autocomplete
+    exposed-modules:  Autocomplete, LoadFile
+    hs-source-dirs:   libs
+
+library loadFile
+    import:           common-all
+    exposed-modules:  LoadFile
+    hs-source-dirs:   libs
+
+library logger
+    import:           common-all
+    exposed-modules:  Logger
+    hs-source-dirs:   libs
+    build-depends:    wai
+
+library json-builder
+    import:           common-all
+    exposed-modules:  JSONBuilder
     hs-source-dirs:   libs
 
 executable autocomplete-api
     import:           common-all
     main-is:          Main.hs
+    build-depends:    warp ^>=3.3.17, http-types, wai
 
     -- Modules included in this executable, other than Main.
-    other-modules: Autocomplete
+    other-modules: Autocomplete, Logger, JSONBuilder
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
