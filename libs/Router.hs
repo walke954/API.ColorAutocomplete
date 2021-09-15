@@ -83,19 +83,19 @@ rout rt req res = do
             app req res
 
 -- parsing requests
-type QueryMap = Map String [String]
+type QueryMap = Map Text [Text]
 
-digestQuery :: String -> QueryMap
+digestQuery :: Text -> QueryMap
 digestQuery s
-    | length s == 0 = Map.empty
+    | Text.length s == 0 = Map.empty
     | otherwise = Map.insert k (v:fv) m
     where
-        kv = takeWhile (/= '&') s
-        rs = drop (length kv + 1) s
-        k = takeWhile (/= '=') kv
-        v = drop (length k + 1) kv
+        kv = Text.takeWhile (/= '&') s
+        rs = Text.drop (Text.length kv + 1) s
+        k = Text.takeWhile (/= '=') kv
+        v = Text.drop (Text.length k + 1) kv
         m = digestQuery rs
         fv = maybe [] id $ Map.lookup k m
 
 parseQuery :: Wai.Request -> QueryMap
-parseQuery = digestQuery . tail . ByteString.unpack . Wai.rawQueryString
+parseQuery = digestQuery . Text.tail . Text.pack . ByteString.unpack . Wai.rawQueryString

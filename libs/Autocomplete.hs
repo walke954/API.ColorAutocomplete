@@ -1,21 +1,26 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Autocomplete where
 
 import Data.Maybe (catMaybes)
+
+import Data.Text (Text)
+import qualified Data.Text as Text
 
 import Data.Map (Map)
 import qualified Data.Map as Map
 
 -- simple aliases
-type Result = String
+type Result = Text
 type ExcludeChar = Char
 type Count = Int
 type DropIndex = Int
 
 -- complex aliases
 type TrieMap = Map Char Trie
-type SearchItem = (Trie, String)
+type SearchItem = (Trie, Text)
 
-createSearchItem :: Trie -> String -> SearchItem
+createSearchItem :: Trie -> Text -> SearchItem
 createSearchItem t s = (t, s)
 
 -- data types
@@ -48,20 +53,20 @@ replaceChildren t m = Trie
     }
 
 -- creates a trie from a list
-fromList :: [String] -> Trie
+fromList :: [Text] -> Trie
 fromList ls = foldl (\t v -> update t v) empty ls
 
 -- updates a trie with a new string
-update :: Trie -> String -> Trie
+update :: Trie -> Text -> Trie
 update t s
     | s == "" = t
     | otherwise = replaceChildren t nm
     where
-        c = head s
+        c = Text.head s
         cm = children t
-        d = new c $ length s == 1
+        d = new c $ Text.length s == 1
         nt = maybe d id $ Map.lookup c cm
-        nm = Map.insert c (update nt (tail s)) cm
+        nm = Map.insert c (update nt (Text.tail s)) cm
 
 data SearchOptions = SearchOptions
     { count :: Int
@@ -81,22 +86,22 @@ createSearchOptions c r = SearchOptions
     }
 
 -- checks if string is contained in trie
-contains :: Trie -> String -> Bool
+contains :: Trie -> Text -> Bool
 contains t s
     | s == "" = key t
-    | otherwise = maybe False (\v -> contains v (tail s)) nt
+    | otherwise = maybe False (\v -> contains v (Text.tail s)) nt
     where
-        c = head s
+        c = Text.head s
         nt = Map.lookup c $ children t
 
 -- search trie
-search :: Trie -> SearchOptions -> String -> [Result]
+search :: Trie -> SearchOptions -> Text -> [Result]
 search t opts s
     | length ts < 1 = []
     | otherwise = searchThroughPath [] n ts
     where
         n = count opts
-        d = floor $ ratio opts * fromIntegral (length s)
+        d = floor $ ratio opts * fromIntegral (Text.length s)
         ts = findSearchPath 0 d s t
 
 -- helper function for search, searches stack until results found or stack exausted
@@ -118,17 +123,17 @@ searchTrieStack ec n rs qs
     where
         (t, ps) = head qs
         c = char t
-        kv = if (key t) then [ps ++ [c]] else []
+        kv = if (key t) then [Text.snoc ps c] else []
         cs = map mfn $ filter ffn $ Map.elems $ children t
-        mfn v = createSearchItem v $ ps ++ [c]
+        mfn v = createSearchItem v $ Text.snoc ps c
         ffn v = notElem (char v) ec
 
 -- helper function for search, adds all trie nodes to a stack along given string path
-findSearchPath :: Count -> DropIndex -> String -> Trie -> [SearchItem]
+findSearchPath :: Count -> DropIndex -> Text -> Trie -> [SearchItem]
 findSearchPath n d s t
-    | n >= length s = []
+    | n >= Text.length s = []
     | otherwise = maybe [] fn $ Map.lookup c $ children t
     where
-        c = s !! n
+        c = Text.index s n
         fn v = findSearchPath (n + 1) d s v ++ si v
-        si v = if (n >= d) then [createSearchItem v (take n s)] else []
+        si v = if (n >= d) then [createSearchItem v (Text.take n s)] else []
