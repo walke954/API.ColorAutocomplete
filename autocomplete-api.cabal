@@ -52,7 +52,7 @@ library router
                       http-types,
                       wai ^>=3.2.3,
                       aeson ^>=1.5.6.0
-    other-modules:    Autocomplete, JSONBuilder, Logger
+    other-modules:    Autocomplete, Logger
     hs-source-dirs:   libs
 
 executable autocomplete-api

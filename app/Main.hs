@@ -24,8 +24,14 @@ import Network.Wai.Handler.Warp (runEnv)
 import qualified Autocomplete as Auto
 import qualified Logger as Log
 
+import qualified Router
+import Router ( Method(GET)
+              , contentJSON
+              , contentText
+              , parseQuery
+              )
 
-import Router
+type ColorMap = Map String String
 
 -- search options
 opts :: Auto.SearchOptions
@@ -35,14 +41,14 @@ opts = Auto.defaultSearchOptions
 main :: IO ()
 main = do
     ls <- ByteLazy.readFile "assets/colors.json"
-    let dm = Aeson.decode ls :: Maybe (Map String String)
+    let dm = Aeson.decode ls :: Maybe ColorMap
     let m = maybe Map.empty id dm
     let trie = Auto.fromList $ Map.keys m
-    let r = [Route GET "/search" (autocompleteRoute trie)]
-    runEnv 3000 $ router r
+    let r = [Router.Route GET "/search" (autocompleteRoute trie m)]
+    runEnv 3000 $ Router.rout r
 
-autocompleteRoute :: Auto.Trie -> Wai.Application
-autocompleteRoute trie req res = do
+autocompleteRoute :: Auto.Trie -> ColorMap -> Wai.Application
+autocompleteRoute trie cm req res = do
     let qm = parseQuery req
     let ks = Map.keys qm
     let sv = maybe [""] id $ Map.lookup "chars" qm

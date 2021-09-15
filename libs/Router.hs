@@ -68,8 +68,8 @@ contentJSON = ("Content-Type", "application/json")
 contentText :: Header
 contentText = ("Content-Type", "text/plain")
 
-router :: Router -> Wai.Application
-router rt req res = do
+rout :: Router -> Wai.Application
+rout rt req res = do
     Logger.request req
     let m = parseMethod req
     let p = Text.pack $ ByteString.unpack $ Wai.rawPathInfo req
