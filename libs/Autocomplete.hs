@@ -23,7 +23,7 @@ data Trie = Trie
     { char :: Char
     , key :: Bool
     , children :: TrieMap
-    }
+    } deriving (Show, Read, Eq)
 
 empty :: Trie
 empty = Trie
@@ -66,7 +66,7 @@ update t s
 data SearchOptions = SearchOptions
     { count :: Int
     , ratio :: Double
-    }
+    } deriving (Show, Read, Eq)
 
 defaultSearchOptions :: SearchOptions
 defaultSearchOptions = SearchOptions

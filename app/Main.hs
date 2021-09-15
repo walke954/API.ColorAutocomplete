@@ -2,60 +2,48 @@
 
 module Main where
 
-import qualified Data.List as List
+import System.IO
 
-import Data.List (intersperse)
+import Data.Map (Map)
+import qualified Data.Map as Map
 
 import Data.ByteString.Char8 (ByteString)
 import qualified Data.ByteString.Char8 as ByteString
 
-import Network.Wai
+import qualified Network.Wai as Wai
 import Network.HTTP.Types (status200, status400)
 import Network.Wai.Handler.Warp (runEnv)
 
 import qualified Autocomplete as Auto
 import qualified Logger as Log
-import qualified JSONBuilder as JSON
+import qualified JSONBuilder as JSONB
+
+import Router
 
 -- search options
 opts :: Auto.SearchOptions
 opts = Auto.defaultSearchOptions
 
--- type Param = (ByteString, Maybe ByteString)
-
--- key :: Param -> ByteString
--- key p = let (k, _) = p in k
-
--- val :: Param -> ByteString
--- val p = let (_, v) = p in maybe ByteString.empty id v
-
--- getQueryParamVal :: ByteString -> [Param] -> [ByteString]
--- getQueryParamVal k bs =
---     let p = List.filter (\v -> key v == k) bs
---     in map val p
-
--- application definition
-application :: Auto.Trie -> Request -> (Response -> IO ResponseReceived) -> IO ResponseReceived
-application autoref req res = do
-    Log.logRequest req
-    -- let search = ByteString.unwords $ getQueryParamVal "search" $ queryString req
-    -- if (length search /= 1)
-    --     then do
-    --         let msg = JSON.errorMsg "'search' query param required"
-    --         responseReceived <- res $ responseBuilder
-    --             status400
-    --             [("Content-Type", "application/json")]
-    --             msg
-    --         return responseReceived
-    --     else do
-    let rs = Auto.search autoref opts "ho"
-    let msg = JSON.build $ JSON.strArrayify ByteString.pack rs
-    responseReceived <- res $ responseBuilder status200 [("Content-Type", "application/json")] msg
-    return responseReceived
-
 -- -- application start
 main :: IO ()
 main = do
-    let auto = Auto.fromList ["hat", "hills", "holy", "hola", "ho ho ho", "hobo"]
-    runEnv 3000 $ application auto
-    -- return ()
+    handle <- openFile "assets/test.txt" ReadMode  
+    ls <- hGetContents handle
+    let trie = Auto.fromList $ words ls
+    let r = [Route GET "/search" (autocompleteRoute trie)]
+    runEnv 3000 $ router r
+
+autocompleteRoute :: Auto.Trie -> Wai.Application
+autocompleteRoute trie req res = do
+    let qm = parseQuery req
+    let ks = Map.keys qm
+    let sv = maybe [""] id $ Map.lookup "chars" qm
+    if (length ks /= 1 || head ks /= "chars")
+        then do
+            responseReceived <- res $ Wai.responseBuilder status400 [contentText] "Invalid query params"
+            return responseReceived
+        else do
+            let rs = Auto.search trie opts $ head sv
+            let js = JSONB.build $ JSONB.strArrayify ByteString.pack rs
+            responseReceived <- res $ Wai.responseBuilder status200 [contentJSON] js
+            return responseReceived
