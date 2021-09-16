@@ -17,8 +17,6 @@ import qualified Network.Wai as Wai
 import Network.HTTP.Types (status200, status400, status404)
 import Network.HTTP.Types.Header (Header)
 
-import qualified Logger
-
 type Path = Text
 
 data Method = GET | POST | PUT | DELETE | UNDEFINED deriving (Eq, Show, Read, Enum)
@@ -70,7 +68,6 @@ contentText = ("Content-Type", "text/plain")
 
 rout :: Router -> Wai.Application
 rout rt req res = do
-    Logger.request req
     let m = parseMethod req
     let p = Text.pack $ ByteString.unpack $ Wai.rawPathInfo req
     let f = find (compareRoute m p) rt

@@ -33,10 +33,6 @@ common common-libs
     import:             common-all
     hs-source-dirs:     libs
 
-library autocomplete
-    import:             common-libs
-    exposed-modules:    Autocomplete
-
 library logger
     import:             common-libs
     exposed-modules:    Logger
@@ -61,7 +57,7 @@ common common-routes
                         Logger
     hs-source-dirs:     routes, libs
 
-library get-color
+ library get-color
     import:             common-routes
     exposed-modules:    GetColor
     other-modules:      Autocomplete
@@ -75,11 +71,15 @@ executable autocomplete-api
                         aeson ^>=1.5.6.0
 
     -- Modules included in this executable, other than Main.
-    other-modules:      Autocomplete,
+    other-modules:      GetColor,
                         Router,
                         Logger,
-                        GetColor
+                        Autocomplete,
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
-    hs-source-dirs:   app, libs, routes
+    hs-source-dirs:     app,
+                        app/routes,
+                        libs,
+                        routes,
+                        /home/jonathan/modules/haskell/Autocomplete/lib
